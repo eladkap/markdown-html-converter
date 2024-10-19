@@ -38,6 +38,12 @@ class Converter:
                 return
 
     @staticmethod
+    def check_bold_text(md_line: str, html_lines:list):
+        bold_pat = re.compile(r"\*\*([\w]+)\*\*")
+        for term in bold_pat.findall(md_line):
+            html_lines.append(f'<b>{term}</b>\n')
+
+    @staticmethod
     def convert_md_to_html(md_file: str, html_file: str) -> int:
         if not os.path.exists(md_file):
             print(f'Error: file {md_file} not exist')
@@ -54,6 +60,7 @@ class Converter:
         html_lines = []
         for md_line in md_lines:
             Converter.check_headers(md_line, html_lines)
+            Converter.check_bold_text(md_line, html_lines)
 
         Utils.write_html_file(html_lines, html_file, title='TITLE')
 
