@@ -6,13 +6,17 @@
 
 #### header4
 
-This is  **bold**
+This is some line with **stars
+
+This is   **bold** text and also **this** one 
 
 This is *italic*
 
 This is ***bold and italic***
 
+this is **bold** and this is *italic*
 
+this is regular line
 
 
 Ordered list:

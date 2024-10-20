@@ -13,6 +13,14 @@ class ErrorCode(Enum):
 
 class Converter:
     @staticmethod
+    def check_newline(line: str, html_lines: list) -> bool:
+        newline_pat = re.compile(r"^[ ]*\n")
+        if newline_pat.match(line):
+            html_lines.append('<br>')
+            return True
+        return False
+
+    @staticmethod
     def is_valid_md(md_file: str) -> bool:
         return True
 
@@ -30,18 +38,34 @@ class Converter:
         return Converter.check_header(line, 1)
 
     @staticmethod
-    def check_headers(md_line: str, html_lines: list):
+    def check_headers(md_line: str, html_lines: list) -> bool:
         for header_size in range(4, 0, -1):
             header = Converter.check_header(md_line, header_size)
             if header:
                 html_lines.append(f'<h{header_size}>{header}</h{header_size}>')
-                return
+                return True
+        return False
 
     @staticmethod
-    def check_bold_text(md_line: str, html_lines:list):
-        bold_pat = re.compile(r"\*\*([\w]+)\*\*")
-        for term in bold_pat.findall(md_line):
-            html_lines.append(f'<b>{term}</b>\n')
+    def check_style(md_line: str, html_lines: list):
+        term_pat = re.compile(r"(\S+)")
+
+        bold_pat = re.compile(r"^\*\*([\w]+)\*\*$")
+        italic_pat = re.compile(r"^\*([\w]+)\*$")
+        for term in term_pat.findall(md_line):
+            m = bold_pat.search(term)
+            if m:
+                html_lines.append(f'<b>{m.group(1)}</b>')
+                continue
+            m = italic_pat.search(term)
+            if m:
+                html_lines.append(f'<i>{m.group(1)}</i>')
+                continue
+            html_lines.append(term)
+
+    @staticmethod
+    def check_regular_line(md_line, html_lines: list):
+        html_lines.append(md_line)
 
     @staticmethod
     def convert_md_to_html(md_file: str, html_file: str) -> int:
@@ -59,8 +83,13 @@ class Converter:
 
         html_lines = []
         for md_line in md_lines:
-            Converter.check_headers(md_line, html_lines)
-            Converter.check_bold_text(md_line, html_lines)
+            if Converter.check_newline(md_line, html_lines):
+                continue
+            if Converter.check_headers(md_line, html_lines):
+                continue
+            if Converter.check_style(md_line, html_lines):
+                continue
+            # Converter.check_regular_line(md_line, html_lines)
 
         Utils.write_html_file(html_lines, html_file, title='TITLE')
 

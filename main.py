@@ -6,8 +6,7 @@ from converter import Converter, ErrorCode
 """
 Run:
 
-python main.py --md-file C:/md-html-converter/example1.md --html-file C:/md-html-converter/example1.html
-
+python main.py --md-file ./md-files/example1.md --html-file C:/md-html-converter/example1.html
 """
 
 
