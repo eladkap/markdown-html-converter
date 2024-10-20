@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from converter import Converter, ErrorCode
@@ -5,18 +6,20 @@ from converter import Converter, ErrorCode
 """
 Run:
 
-python main.py C:/md-html-converter/example1.md C:/md-html-converter/example.html
+python main.py --md-file C:/md-html-converter/example1.md --html-file C:/md-html-converter/example1.html
 
 """
 
 
 def main() -> int:
-    if len(sys.argv) != 3:
-        print('Error: please enter .md file as input and .html file as output')
-        return 1
+    parser = argparse.ArgumentParser(prog='md-html Converter',
+                                     description='Markdown-HTML Converter')
+    parser.add_argument('-m', '--md-file', required=True, help='md file path')
+    parser.add_argument('-t', '--html-file', required=True, help='html file path')
+    args = parser.parse_args()
 
-    md_file = sys.argv[1]
-    html_file = sys.argv[2]
+    md_file = args.md_file
+    html_file = args.html_file
 
     error_code = Converter.convert_md_to_html(md_file, html_file)
 
