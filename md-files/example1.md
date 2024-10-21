@@ -34,4 +34,16 @@ Unordered list:
 This is code:
 ```
 print('hello world')
+do_some_operation(x)
+do_other(y)
+finish
+```
+
+# this is more code
+```
+hello world
+
+Tada
+
+amazing!
 ```

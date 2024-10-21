@@ -76,7 +76,7 @@ class Converter:
         return None
 
     @staticmethod
-    def is_unordered_list_item(md_line: str):
+    def is_unordered_list_item(md_line: str) -> bool:
         return Converter.get_unordered_list_item(md_line) is not None
 
     @staticmethod
@@ -88,7 +88,7 @@ class Converter:
         return None
 
     @staticmethod
-    def is_ordered_list_item(md_line: str):
+    def is_ordered_list_item(md_line: str) -> bool:
         return Converter.get_ordered_list_item(md_line) is not None
 
     @staticmethod
@@ -110,6 +110,18 @@ class Converter:
         html_lines.append('</ol>')
 
     @staticmethod
+    def is_code_symbol(md_line: str) -> bool:
+        return md_line.startswith("```")
+
+    @staticmethod
+    def add_code_lines(code_lines: list, html_lines: list):
+        html_lines.append(
+            '<p style=\"font-family: consolas; font-size: small; background-color: lightgray; left: 5px; right: 5px;\">')
+        for code_line in code_lines:
+            html_lines.append(code_line + '<br>')
+        html_lines.append('</p>')
+
+    @staticmethod
     def convert_md_to_html(md_file: str, html_file: str) -> int:
         if not os.path.exists(md_file):
             print(f'Error: file {md_file} not exist')
@@ -126,7 +138,6 @@ class Converter:
         unordered_list = []
         ordered_list = []
         html_lines = []
-        # for i, md_line in enumerate(md_lines):
 
         i = 0
         while i < len(md_lines):
@@ -137,6 +148,18 @@ class Converter:
                 continue
 
             if Converter.check_headers(md_line, html_lines):
+                i += 1
+                continue
+
+            if Converter.is_code_symbol(md_line):
+                code_lines = []
+                i += 1
+                md_line = md_lines[i]
+                while i < len(md_lines) and not Converter.is_code_symbol(md_line):
+                    code_lines.append(md_line)
+                    i += 1
+                    md_line = md_lines[i]
+                Converter.add_code_lines(code_lines, html_lines)
                 i += 1
                 continue
 
