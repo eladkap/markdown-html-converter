@@ -16,7 +16,7 @@ This is ***bold and italic***
 
 this is **bold** and this is *italic*
 
-this is regular line
+this is regular line: %
 
 
 Ordered list:

@@ -30,3 +30,7 @@ def main() -> int:
 
 if __name__ == '__main__':
     sys.exit(main())
+
+    # md_file = './md-files/example1.md'
+    # html_file = 'C:/md-html-converter/example1.html'
+    # error_code = Converter.convert_md_to_html(md_file, html_file)

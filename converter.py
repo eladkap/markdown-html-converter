@@ -49,10 +49,14 @@ class Converter:
     @staticmethod
     def check_style(md_line: str, html_lines: list):
         term_pat = re.compile(r"(\S+)")
-
+        bold_and_italic = re.compile(r"^\*\*\*([\w]+)\*\*\*$")
         bold_pat = re.compile(r"^\*\*([\w]+)\*\*$")
         italic_pat = re.compile(r"^\*([\w]+)\*$")
         for term in term_pat.findall(md_line):
+            m = bold_and_italic.search(term)
+            if m:
+                html_lines.append(f'<b><i>{m.group(1)}</i></b>')
+                continue
             m = bold_pat.search(term)
             if m:
                 html_lines.append(f'<b>{m.group(1)}</b>')
@@ -64,8 +68,46 @@ class Converter:
             html_lines.append(term)
 
     @staticmethod
+    def get_unordered_list_item(md_line: str):
+        pat = re.compile(r"\-\s+([\S]+)")
+        m = pat.search(md_line)
+        if m:
+            return m.group(1)
+        return None
+
+    @staticmethod
+    def is_unordered_list_item(md_line: str):
+        return Converter.get_unordered_list_item(md_line) is not None
+
+    @staticmethod
+    def get_ordered_list_item(md_line: str):
+        pat = re.compile(r"[1-9]+\.\s+([\S]+)")
+        m = pat.search(md_line)
+        if m:
+            return m.group(1)
+        return None
+
+    @staticmethod
+    def is_ordered_list_item(md_line: str):
+        return Converter.get_ordered_list_item(md_line) is not None
+
+    @staticmethod
     def check_regular_line(md_line, html_lines: list):
         html_lines.append(md_line)
+
+    @staticmethod
+    def add_unordered_list(unordered_list: list, html_lines: list):
+        html_lines.append('<ul>')
+        for item in unordered_list:
+            html_lines.append(f'<li>{item}</li>')
+        html_lines.append('</ul>')
+
+    @staticmethod
+    def add_ordered_list(ordered_list: list, html_lines: list):
+        html_lines.append('<ol>')
+        for item in ordered_list:
+            html_lines.append(f'<li>{item}</li>')
+        html_lines.append('</ol>')
 
     @staticmethod
     def convert_md_to_html(md_file: str, html_file: str) -> int:
@@ -81,15 +123,40 @@ class Converter:
             print('Error: invalid .md file')
             return ErrorCode.BAD_MD_SYNTAX.value
 
+        unordered_list = []
+        ordered_list = []
         html_lines = []
-        for md_line in md_lines:
+        # for i, md_line in enumerate(md_lines):
+
+        i = 0
+        while i < len(md_lines):
+            md_line = md_lines[i]
+
             if Converter.check_newline(md_line, html_lines):
+                i += 1
                 continue
+
             if Converter.check_headers(md_line, html_lines):
+                i += 1
                 continue
-            if Converter.check_style(md_line, html_lines):
-                continue
-            # Converter.check_regular_line(md_line, html_lines)
+
+            while i < len(md_lines) and Converter.is_unordered_list_item(md_line):
+                unordered_list.append(Converter.get_unordered_list_item(md_line))
+                i += 1
+                md_line = md_lines[i]
+            Converter.add_unordered_list(unordered_list, html_lines)
+            unordered_list = []
+
+            while i < len(md_lines) and Converter.is_ordered_list_item(md_line):
+                ordered_list.append(Converter.get_ordered_list_item(md_line))
+                i += 1
+                md_line = md_lines[i]
+            Converter.add_ordered_list(ordered_list, html_lines)
+            ordered_list = []
+
+            Converter.check_style(md_line, html_lines)
+
+            i += 1
 
         Utils.write_html_file(html_lines, html_file, title='TITLE')
 
