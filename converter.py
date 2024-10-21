@@ -27,7 +27,7 @@ class Converter:
     @staticmethod
     def check_header(line: str, header_size: int):
         hash_tags = '#' * header_size
-        header_pat = re.compile(fr"{hash_tags}\s+([\w]+)")
+        header_pat = re.compile(fr"{hash_tags}\s+([\S ]+)")
         m = header_pat.search(line)
         if m:
             return m.group(1)
@@ -39,7 +39,7 @@ class Converter:
 
     @staticmethod
     def check_headers(md_line: str, html_lines: list) -> bool:
-        for header_size in range(4, 0, -1):
+        for header_size in range(6, 0, -1):
             header = Converter.check_header(md_line, header_size)
             if header:
                 html_lines.append(f'<h{header_size}>{header}</h{header_size}>')
