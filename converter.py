@@ -53,12 +53,14 @@ class Converter:
         italic_pat1 = re.compile(r"^\*([\w ]+)\*$")
         italic_pat2 = re.compile(r"^_([\w ]+)_$")
         strike_pat = re.compile(r"^~~([\w ]+)~~$")
+        anchor_pat = re.compile(r"^\[([\w ]+)\]\(([\w\:\/\.]+)\)$")
 
         m1 = bold_pat1.search(md_line)
         m2 = bold_pat2.search(md_line)
         m3 = italic_pat1.search(md_line)
         m4 = italic_pat2.search(md_line)
         m5 = strike_pat.search(md_line)
+        m6 = anchor_pat.search(md_line)
         if m1 is not None:
             return f"<b>{m1.group(1)}</b>"
         if m2 is not None:
@@ -69,6 +71,8 @@ class Converter:
             return f"<i>{m4.group(1)}</i>"
         if m5 is not None:
             return f"<s>{m5.group(1)}</s>"
+        if m6 is not None:
+            return f"<a href={m6.group(1)}>{m6.group(2)}</a>"
         return None
 
     @staticmethod
