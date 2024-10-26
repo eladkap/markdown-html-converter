@@ -47,12 +47,36 @@ class Converter:
         return False
 
     @staticmethod
-    def get_styled_line(md_line) -> str:
+    def get_single_styled_line(md_line: str):
+        bold_pat1 = re.compile(r"^\*\*([\w ]+)\*\*$")
+        bold_pat2 = re.compile(r"^__([\w ]+)__$")
+        italic_pat1 = re.compile(r"^\*([\w ]+)\*$")
+        italic_pat2 = re.compile(r"^_([\w ]+)_$")
+        strike_pat = re.compile(r"^~~([\w ]+)~~$")
+
+        m1 = bold_pat1.search(md_line)
+        m2 = bold_pat2.search(md_line)
+        m3 = italic_pat1.search(md_line)
+        m4 = italic_pat2.search(md_line)
+        m5 = strike_pat.search(md_line)
+        if m1 is not None:
+            return f"<b>{m1.group(1)}</b>"
+        if m2 is not None:
+            return f"<b>{m2.group(1)}</b>"
+        if m3 is not None:
+            return f"<i>{m3.group(1)}</i>"
+        if m4 is not None:
+            return f"<i>{m4.group(1)}</i>"
+        if m5 is not None:
+            return f"<s>{m5.group(1)}</s>"
+        return None
+
+    @staticmethod
+    def get_styled_line(md_line: str) -> str:
         html_lines = []
         term_pat = re.compile(r"(\S+)")
-        bold_and_italic = re.compile(r"^\*\*\*([\w]+)\*\*\*$")
-        bold_pat = re.compile(r"^\*\*([\w]+)\*\*$")
-        italic_pat = re.compile(r"^\*([\w]+)\*$")
+        bold_pat = re.compile(r"\*\*([\w]+)\*\*")
+        italic_pat = re.compile(r"\*([\w]+)\*")
         anchor_pat = re.compile(r"\[(\w+)\]\(([\w\:\/\.]+)\)")
 
         for term in term_pat.findall(md_line):
@@ -61,10 +85,6 @@ class Converter:
                 html_lines.append(f"<a href='{m.group(2)}'>{m.group(1)}</a>")
                 continue
 
-            m = bold_and_italic.search(term)
-            if m:
-                html_lines.append(f'<b><i>{m.group(1)}</i></b>')
-                continue
             m = bold_pat.search(term)
             if m:
                 html_lines.append(f'<b>{m.group(1)}</b>')
@@ -81,9 +101,8 @@ class Converter:
     @staticmethod
     def check_style(md_line: str, html_lines: list):
         term_pat = re.compile(r"(\S+)")
-        bold_and_italic = re.compile(r"^\*\*\*([\w]+)\*\*\*$")
-        bold_pat = re.compile(r"^\*\*([\w]+)\*\*$")
-        italic_pat = re.compile(r"^\*([\w]+)\*$")
+        bold_pat = re.compile(r"\*\*([\w]+)\*\*")
+        italic_pat = re.compile(r"\*([\w]+)\*")
         anchor_pat = re.compile(r"\[(\w+)\]\(([\w\:\/\.]+)\)")
 
         for term in term_pat.findall(md_line):
@@ -92,10 +111,6 @@ class Converter:
                 html_lines.append(f"<a href='{m.group(2)}'>{m.group(1)}</a>")
                 continue
 
-            m = bold_and_italic.search(term)
-            if m:
-                html_lines.append(f'<b><i>{m.group(1)}</i></b>')
-                continue
             m = bold_pat.search(term)
             if m:
                 html_lines.append(f'<b>{m.group(1)}</b>')
@@ -115,7 +130,7 @@ class Converter:
 
     @staticmethod
     def get_unordered_list_item(md_line: str):
-        pat = re.compile(r"^\-\s+([\S]+)")
+        pat = re.compile(r"^\-\s+([\S ]+)")
         m = pat.search(md_line)
         if m:
             line = m.group(1)
@@ -145,6 +160,8 @@ class Converter:
 
     @staticmethod
     def add_unordered_list(unordered_list: list, html_lines: list):
+        if len(unordered_list) == 0:
+            return
         html_lines.append('<ul>')
         for item in unordered_list:
             html_lines.append(f'<li>{item}</li>')
@@ -152,6 +169,8 @@ class Converter:
 
     @staticmethod
     def add_ordered_list(ordered_list: list, html_lines: list):
+        if len(ordered_list) == 0:
+            return
         html_lines.append('<ol>')
         for item in ordered_list:
             html_lines.append(f'<li>{item}</li>')
@@ -213,7 +232,7 @@ class Converter:
 
             while i < len(md_lines) and Converter.is_unordered_list_item(md_line):
                 list_item = Converter.get_unordered_list_item(md_line)
-                if not list_item:
+                if list_item is not None:
                     unordered_list.append(list_item)
                 i += 1
                 md_line = md_lines[i]
@@ -221,13 +240,20 @@ class Converter:
             unordered_list = []
 
             while i < len(md_lines) and Converter.is_ordered_list_item(md_line):
-                ordered_list.append(Converter.get_ordered_list_item(md_line))
+                list_item = Converter.get_ordered_list_item(md_line)
+                if list_item is not None:
+                    ordered_list.append(list_item)
                 i += 1
                 md_line = md_lines[i]
             Converter.add_ordered_list(ordered_list, html_lines)
             ordered_list = []
 
-            # Converter.check_style(md_line, html_lines)
+            single_styled_line = Converter.get_single_styled_line(md_line)
+            if single_styled_line is not None:
+                html_lines.append(single_styled_line)
+                i += 1
+                continue
+
             html_lines.append(Converter.get_styled_line(md_line))
 
             i += 1

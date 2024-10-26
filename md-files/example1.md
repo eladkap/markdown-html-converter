@@ -1,3 +1,13 @@
+## Emphasis
+
+**This is bold text**
+
+__This is bold text__
+
+*This is italic text*
+
+_This is italic text_
+
 # header1
 
 ## header2
@@ -5,6 +15,8 @@
 ### header3
 
 #### header4
+
+
 
 [pica](https://nodeca.github.io/pica/demo/) - high quality and fast image
 resize in browser.
