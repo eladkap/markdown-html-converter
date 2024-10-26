@@ -32,9 +32,9 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    # sys.exit(main())
+    sys.exit(main())
 
-    example_num = 1
-    md_file = f'./md-files/example{example_num}.md'
-    html_file = f'C:/md-html-converter/example{example_num}.html'
-    error_code = Converter.convert_md_to_html(md_file, html_file)
+    # example_num = 1
+    # md_file = f'./md-files/example{example_num}.md'
+    # html_file = f'C:/md-html-converter/example{example_num}.html'
+    # error_code = Converter.convert_md_to_html(md_file, html_file)
