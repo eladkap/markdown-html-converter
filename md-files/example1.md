@@ -6,6 +6,9 @@
 
 #### header4
 
+[pica](https://nodeca.github.io/pica/demo/) - high quality and fast image
+resize in browser.
+
 This is some line with **stars
 
 This is   **bold** text and also **this** one 
